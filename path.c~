@@ -1,0 +1,38 @@
+#include "shell.h"
+
+/**
+ * path - searches for the full path of a command
+ * @args: array of arguments entered by the user
+ * @environ: array of environment variables
+ *
+ * Return: pointer to the full path of the command, or NULL if not found
+ */
+char *path(char **args, char **environ)
+{
+char *path, *dir, *command;
+struct stat st;
+int i = 0;
+
+path = _getenv("PATH");
+command = args[0];
+
+while (path && path[i])
+{
+dir = path + i;
+i += _strlen(dir) + 1;
+
+if (*dir == '\0')
+dir = ".";
+
+if (stat(dir, &st) == 0 && S_ISDIR(st.st_mode))
+{
+dir = _strcat(dir, "/");
+dir = _strcat(dir, command);
+
+if (access(dir, X_OK) == 0)
+return (dir);
+}
+}
+
+return (NULL);
+}
