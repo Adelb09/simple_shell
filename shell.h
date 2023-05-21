@@ -24,5 +24,9 @@ char *path(char **args, char **environ);
 int _strlen(char *s);
 char *_strcat(char *dest, char *src);
 void prompt(void);
+char *read_line(void);
+char **split_line(char *line);
+int execute(char **args);
+void exit_shell(void);
 
 #endif /* SHELL_H */

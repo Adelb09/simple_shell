@@ -1,0 +1,69 @@
+#include "shell.h"
+
+/* Helper function to change directory */
+int cd_command(char **args)
+{
+if (args[1] == NULL) {
+fprintf(stderr, "cd: expected argument to \"cd\"\n");
+} else {
+if (chdir(args[1]) != 0) {
+perror("shell");
+}
+}
+return 1;
+}
+
+/* Helper function to exit the shell */
+int exit_command(void)
+{
+return 0;
+}
+
+/* Execute the appropriate built-in command */
+int execute_builtin_command(char **args)
+{
+int status = -1;  
+if (strcmp(args[0], "cd") == 0) {
+return cd_command(args);
+} else if (strcmp(args[0], "exit") == 0) {
+return exit_command(args);
+}
+
+return -1;  /* Not a built-in command */
+}
+
+/* Execute the command */
+int execute(char **args)
+{
+if (args[0] == NULL) {
+// Empty command entered
+return 1;
+}
+
+int status = execute_builtin_command(args);
+if (status != -1) {
+// It was a built-in command
+return status;
+}
+
+pid_t pid, wpid;
+
+pid = fork();
+if (pid == 0) {
+// Child process
+if (execvp(args[0], args) == -1) {
+perror("shell");
+}
+exit(EXIT_FAILURE);
+} else if (pid < 0) {
+// Error forking
+perror("shell");
+} else {
+// Parent process
+do {
+wpid = waitpid(pid, &status, WUNTRACED);
+} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+}
+
+return 1;
+}
